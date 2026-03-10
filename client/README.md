@@ -1,36 +1,73 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Ecoyaan Checkout Flow (Assignment MVP)
 
-## Getting Started
+This project is a simplified checkout flow built with Next.js App Router.
 
-First, run the development server:
+## Stack
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+- React + Next.js (App Router)
+- Server Components for SSR data fetching
+- Context API for checkout state (shipping address)
+- Plain CSS for responsive UI
+
+## Flow Implemented
+
+1. `GET /` - Cart / Order Summary
+2. `GET /checkout` - Shipping Address form + validation
+3. `GET /payment` - Final confirmation + simulated payment
+4. `GET /success` - Order success state
+
+## SSR Requirement
+
+Cart data is fetched asynchronously on the server in:
+
+- `src/app/page.jsx`
+- `src/app/payment/page.jsx`
+
+using `getCartData()` from `src/lib/cartService.js`. Both pages use:
+
+```js
+export const dynamic = "force-dynamic";
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+to ensure server-side rendering on each request.
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+## State Management
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+`src/app/providers.jsx` defines a `CheckoutProvider` with Context API to persist shipping address across route transitions.
 
-## Learn More
+- Address is stored in React state
+- Synced to `localStorage` for refresh resilience
 
-To learn more about Next.js, take a look at the following resources:
+## Form Validation
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+The shipping form validates:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- required fields
+- email format
+- 10-digit phone number
+- 6-digit PIN code
 
-## Deploy on Vercel
+## Run Locally
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+```bash
+cd client
+npm install
+npm run dev
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Open `http://localhost:3000`.
+
+## Build
+
+```bash
+cd client
+npm run build
+npm start
+```
+
+## Deployment
+
+Deploy to Vercel or Netlify.
+
+- Vercel: import repository and set root directory to `client`
+- Netlify: set build command `npm run build` and publish directory `.next`
