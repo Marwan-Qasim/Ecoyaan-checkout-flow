@@ -1,4 +1,5 @@
 import Link from "next/link";
+import CheckoutNavbar from "@/components/CheckoutNavbar";
 import { getCartData } from "@/lib/cartService";
 
 export const dynamic = "force-dynamic";
@@ -23,24 +24,6 @@ function TrashIcon() {
   );
 }
 
-function CartIcon() {
-  return (
-    <svg viewBox="0 0 24 24" aria-hidden="true" className="icon-stroke">
-      <path d="M8 7V6a4 4 0 1 1 8 0v1" />
-      <path d="M6 7h12l1 13H5L6 7Z" />
-    </svg>
-  );
-}
-
-function ProfileIcon() {
-  return (
-    <svg viewBox="0 0 24 24" aria-hidden="true" className="icon-stroke">
-      <path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z" />
-      <path d="M5 20a7 7 0 0 1 14 0" />
-    </svg>
-  );
-}
-
 export default async function Home() {
   const data = await getCartData();
   const subtotal = data.cartItems.reduce(
@@ -51,23 +34,7 @@ export default async function Home() {
 
   return (
     <main className="checkout-shell">
-      <header className="checkout-header">
-        <Link href="/" className="brand-mark">
-          Ecoyaan
-        </Link>
-
-        <nav className="checkout-steps" aria-label="Checkout progress">
-          <span className="is-active">Cart</span>
-          <span>Address</span>
-          <span>Payment</span>
-          <span>Success</span>
-        </nav>
-
-        <div className="header-icons" aria-hidden="true">
-          <CartIcon />
-          <ProfileIcon />
-        </div>
-      </header>
+      <CheckoutNavbar activeStep="Cart" />
 
       <section className="hero-copy">
         <p className="eyebrow">The Conscious Choice</p>

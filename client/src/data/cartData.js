@@ -7,7 +7,7 @@ export const cartData = {
       product_price: 299,
       quantity: 2,
       image:
-        "https://images.unsplash.com/photo-1559591937-abc0b0d39b00?auto=format&fit=crop&w=500&q=80"
+        "https://lh3.googleusercontent.com/aida-public/AB6AXuCQrCpmKvRJv4RwCxbKBmEcv14_6AVIp1voCWSrBTYlTD5s6jqDD6WjCfOzTKe04Y5g-hBzEtNJHmbgRpUeelr_QmeUlb-EPHjZo10RshWYdpdGr1GF4KkzFEljk3he9oQRf05ScNVKs-s2pJnzQavVAZRIW8yUF6cFTet43K-fxJRiMi0yPAhHT90-_WdzuDwWn3gUegLOunGh0UYNpsxHMEZXjUqT-F3eGaFB2EQ6FZMAZ0WT3KN8d5SkBTtAFi7TBc33lFFANJ6_"
     },
     {
       product_id: 102,
@@ -16,7 +16,7 @@ export const cartData = {
       product_price: 450,
       quantity: 1,
       image:
-        "https://images.unsplash.com/photo-1615485290382-441e4d049cb5?auto=format&fit=crop&w=500&q=80"
+        "https://lh3.googleusercontent.com/aida-public/AB6AXuA4jblOCfHUdzKmMnLfVELn8f8y0r97SetjRJs5-4TFkUbxVXyqVt18BxjNiP2VTfCLphsxTv5vcrg_W45fR7wPPJS1H25LiXGtU7nzzHod8B8Csjr8A3_we4xlJGQIV8MlXwxlPpIdxvD53oZoXK1RE_GAtRlTa6XS_6D9iu2axusGoAIiUs2plE94r4A55m4XK8iJxwWjvlZIeIWelQWy6Uq5Ed8AlUtR1ngRlAsF2vKMojnMl0elhYoPMwR4SLoXIKRzd70UhLSt"
     }
   ],
   shipping_fee: 50,
