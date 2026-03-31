@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import { useCheckout } from "@/app/providers";
 import CheckoutNavbar from "@/components/CheckoutNavbar";
 
 function StrokeIcon({ children }) {
@@ -50,6 +53,8 @@ function ArrowRightIcon() {
 }
 
 export default function SuccessPage() {
+  const { address } = useCheckout();
+
   return (
     <main className="checkout-shell success-shell">
       <CheckoutNavbar activeStep="Success" />
@@ -76,9 +81,11 @@ export default function SuccessPage() {
       <section className="success-info-grid">
         <article className="success-info-card">
           <h3>Delivery Address</h3>
-          <p>123 Eco Valley, Sustainable Street</p>
-          <p>Green District, 560001</p>
-          <p>Earth Prime</p>
+          <p>{address.fullName}</p>
+          <p>{address.email}</p>
+          <p>{address.city} - {address.pinCode}</p>
+          <p>{address.state}, India</p>
+          <p>{address.phone}</p>
         </article>
 
         <article className="success-info-card">

@@ -14,30 +14,16 @@ const initialErrors = {
   state: "",
 };
 
-const savedAddresses = [
-  {
-    id: "home",
-    title: "Amrita Singh",
-    lines: [
-      "42 Green Terrace, Bloom Gardens",
-      "Indiranagar, Bangalore",
-      "Karnataka - 560038",
-    ],
-    phone: "+91 98765 43210",
-    type: "home",
-  },
-  {
-    id: "office",
-    title: "Amrita Singh",
-    lines: [
-      "EcoHub Coworking Space, Level 4",
-      "Outer Ring Road",
-      "Bangalore, Karnataka - 560103",
-    ],
-    phone: "+91 98765 43210",
-    type: "office",
-  },
-];
+const emptyAddress = {
+  fullName: "",
+  email: "",
+  phone: "",
+  pinCode: "",
+  city: "",
+  state: "",
+};
+
+const MAX_SAVED_ADDRESSES = 2;
 
 function validate(values) {
   const errors = { ...initialErrors };
@@ -69,6 +55,33 @@ function validate(values) {
   return errors;
 }
 
+function formatPhone(phone) {
+  const digits = phone.replace(/\D/g, "");
+  if (digits.length !== 10) {
+    return phone;
+  }
+  return `+91 ${digits.slice(0, 5)} ${digits.slice(5)}`;
+}
+
+function toSavedAddress(values, index) {
+  return {
+    id: `address-${Date.now()}-${index}`,
+    title: values.fullName.trim(),
+    lines: [values.city.trim(), `${values.state.trim()} - ${values.pinCode.trim()}`],
+    phone: formatPhone(values.phone.trim()),
+    email: values.email.trim(),
+    values: {
+      fullName: values.fullName.trim(),
+      email: values.email.trim(),
+      phone: values.phone.trim(),
+      pinCode: values.pinCode.trim(),
+      city: values.city.trim(),
+      state: values.state.trim(),
+    },
+    type: index % 2 === 0 ? "home" : "office",
+  };
+}
+
 function StrokeIcon({ children }) {
   return (
     <svg viewBox="0 0 24 24" aria-hidden="true" className="icon-stroke">
@@ -77,30 +90,23 @@ function StrokeIcon({ children }) {
   );
 }
 
-function HomeIcon() {
-  return (
-    <StrokeIcon>
-      <path d="M5 11.5 12 6l7 5.5" />
-      <path d="M7.5 10.5V18h9v-7.5" />
-    </StrokeIcon>
-  );
-}
-
-function BriefcaseIcon() {
-  return (
-    <StrokeIcon>
-      <path d="M8 7V5.5h8V7" />
-      <path d="M4.5 8h15v10.5h-15z" />
-      <path d="M4.5 11.5h15" />
-    </StrokeIcon>
-  );
-}
-
 function PencilIcon() {
   return (
     <StrokeIcon>
       <path d="m8 16 6.75-6.75 1.75 1.75L9.75 17.75 7.5 18.5z" />
       <path d="m13.75 10.25 1.75-1.75 1.75 1.75-1.75 1.75" />
+    </StrokeIcon>
+  );
+}
+
+function TrashIcon() {
+  return (
+    <StrokeIcon>
+      <path d="M4 7h16" />
+      <path d="M10 11v6" />
+      <path d="M14 11v6" />
+      <path d="M6 7l1 12h10l1-12" />
+      <path d="M9 7V4h6v3" />
     </StrokeIcon>
   );
 }
@@ -142,28 +148,165 @@ function ArrowRightIcon() {
 
 export default function CheckoutPage() {
   const router = useRouter();
-  const { address, setAddress } = useCheckout();
+  const {
+    address,
+    setAddress,
+    savedAddresses,
+    setSavedAddresses,
+    selectedAddressId,
+    setSelectedAddressId,
+    defaultAddressId,
+    setDefaultAddressId,
+  } = useCheckout();
   const [values, setValues] = useState(address);
   const [errors, setErrors] = useState(initialErrors);
-  const [selectedAddress, setSelectedAddress] = useState("home");
   const [useDefault, setUseDefault] = useState(false);
+  const [limitError, setLimitError] = useState("");
+  const [editingAddressId, setEditingAddressId] = useState("");
+
+  const hasSavedAddresses = savedAddresses.length > 0;
+  const isEditing = Boolean(editingAddressId);
 
   function handleChange(event) {
     const { name, value } = event.target;
     setValues((prev) => ({ ...prev, [name]: value }));
+    if (limitError) {
+      setLimitError("");
+    }
   }
 
-  function handleSubmit(event) {
+  function handleAddAddress(event) {
     event.preventDefault();
+
+    if (!isEditing && savedAddresses.length >= MAX_SAVED_ADDRESSES) {
+      setLimitError("You can add at most 2 addresses.");
+      return;
+    }
+
     const validationErrors = validate(values);
     setErrors(validationErrors);
+    setLimitError("");
 
     const hasErrors = Object.values(validationErrors).some(Boolean);
     if (hasErrors) {
       return;
     }
 
-    setAddress(values);
+    if (isEditing) {
+      const existingAddress = savedAddresses.find((item) => item.id === editingAddressId);
+      if (!existingAddress) {
+        setEditingAddressId("");
+        return;
+      }
+
+      const updatedAddress = {
+        ...toSavedAddress(values, savedAddresses.length),
+        id: existingAddress.id,
+        type: existingAddress.type,
+      };
+
+      setSavedAddresses((prev) =>
+        prev.map((item) => (item.id === editingAddressId ? updatedAddress : item))
+      );
+      setSelectedAddressId(updatedAddress.id);
+      if (useDefault) {
+        setDefaultAddressId(updatedAddress.id);
+      } else if (defaultAddressId === updatedAddress.id) {
+        setDefaultAddressId("");
+      }
+      setAddress(updatedAddress.values);
+      setValues(updatedAddress.values);
+      setEditingAddressId("");
+      setErrors(initialErrors);
+      return;
+    }
+
+    const nextAddress = toSavedAddress(values, savedAddresses.length);
+
+    setSavedAddresses((prev) => [...prev, nextAddress]);
+    setSelectedAddressId(nextAddress.id);
+    if (useDefault || !defaultAddressId) {
+      setDefaultAddressId(nextAddress.id);
+    }
+    setAddress(nextAddress.values);
+    setValues(useDefault ? emptyAddress : nextAddress.values);
+    setErrors(initialErrors);
+    setLimitError("");
+  }
+
+  function handleSelectAddress(id) {
+    setSelectedAddressId(id);
+    const chosen = savedAddresses.find((item) => item.id === id);
+    if (!chosen) {
+      return;
+    }
+
+    setValues(chosen.values);
+    setUseDefault(defaultAddressId === id);
+    setEditingAddressId("");
+    setAddress(chosen.values);
+  }
+
+  function handleEditAddress(id) {
+    const chosen = savedAddresses.find((item) => item.id === id);
+    if (!chosen) {
+      return;
+    }
+
+    setSelectedAddressId(id);
+    setValues(chosen.values);
+    setUseDefault(defaultAddressId === id);
+    setEditingAddressId(id);
+    setErrors(initialErrors);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  function handleRemoveAddress(id) {
+    const nextAddresses = savedAddresses.filter((item) => item.id !== id);
+    setSavedAddresses(nextAddresses);
+
+    if (!nextAddresses.length) {
+      setSelectedAddressId("");
+      setDefaultAddressId("");
+      setAddress(emptyAddress);
+      setValues(emptyAddress);
+      setUseDefault(false);
+      setEditingAddressId("");
+      setLimitError("");
+      return;
+    }
+
+    const nextSelectedId =
+      selectedAddressId === id ? nextAddresses[0].id : selectedAddressId;
+    const chosen = nextAddresses.find((item) => item.id === nextSelectedId) ?? nextAddresses[0];
+
+    if (defaultAddressId === id) {
+      setDefaultAddressId("");
+    }
+    if (editingAddressId === id) {
+      setEditingAddressId("");
+      setUseDefault(false);
+    }
+    setSelectedAddressId(chosen.id);
+    setAddress(chosen.values);
+    setValues(chosen.values);
+  }
+
+  function handleSetDefaultAddress() {
+    if (!selectedAddressId) {
+      return;
+    }
+
+    setDefaultAddressId(selectedAddressId);
+  }
+
+  function handleContinue() {
+    const chosen = savedAddresses.find((item) => item.id === selectedAddressId);
+    if (!chosen) {
+      return;
+    }
+
+    setAddress(chosen.values);
     router.push("/payment");
   }
 
@@ -171,7 +314,7 @@ export default function CheckoutPage() {
     <main className="checkout-shell address-shell">
       <CheckoutNavbar activeStep="Address" />
 
-      <section className="address-hero">
+      <section className={`address-hero${!hasSavedAddresses ? " is-empty" : ""}`}>
         <h1>Shipping Address</h1>
         <p>
           Select a destination for your sustainable essentials. Every delivery
@@ -179,72 +322,116 @@ export default function CheckoutPage() {
         </p>
       </section>
 
-      <section className="saved-section">
-        <div className="saved-section-heading">
-          <h2>Saved Addresses</h2>
-          <span>2 Saved</span>
-        </div>
+      {hasSavedAddresses ? (
+        <>
+          <section className="saved-section">
+            <div className="saved-section-heading">
+              <h2>Saved Addresses</h2>
+              <span>{savedAddresses.length} Saved</span>
+            </div>
 
-        <div className="saved-grid">
-          {savedAddresses.map((item) => {
-            const active = item.id === selectedAddress;
-            const TypeIcon = item.type === "home" ? HomeIcon : BriefcaseIcon;
+            <div className="saved-grid">
+              {savedAddresses.map((item) => {
+                const active = item.id === selectedAddressId;
+                const isDefault = item.id === defaultAddressId;
 
-            return (
-              <article
-                key={item.id}
-                className={`saved-card${active ? " is-selected" : ""}`}
-                onClick={() => setSelectedAddress(item.id)}
-                onKeyDown={(event) => {
-                  if (event.key === "Enter" || event.key === " ") {
-                    event.preventDefault();
-                    setSelectedAddress(item.id);
-                  }
-                }}
-                role="button"
-                tabIndex={0}
-                aria-pressed={active}
+                return (
+                  <article
+                    key={item.id}
+                    className={`saved-card${active ? " is-selected" : ""}`}
+                    onClick={() => handleSelectAddress(item.id)}
+                    onKeyDown={(event) => {
+                      if (event.key === "Enter" || event.key === " ") {
+                        event.preventDefault();
+                        handleSelectAddress(item.id);
+                      }
+                    }}
+                    role="button"
+                    tabIndex={0}
+                    aria-pressed={active}
+                  >
+                    <div className="saved-card-top">
+                      <div className="saved-card-actions">
+                        <button
+                          type="button"
+                          className="saved-round-btn"
+                          aria-label={`Edit ${item.title}`}
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            handleEditAddress(item.id);
+                          }}
+                        >
+                          <PencilIcon />
+                        </button>
+                        <button
+                          type="button"
+                          className="saved-round-btn"
+                          aria-label={`Remove ${item.title}`}
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            handleRemoveAddress(item.id);
+                          }}
+                        >
+                          <TrashIcon />
+                        </button>
+                        {active ? (
+                          <span className="saved-round-btn saved-round-btn-dark" aria-hidden="true">
+                            <CheckIcon />
+                          </span>
+                        ) : null}
+                      </div>
+                    </div>
+
+                    <div className="saved-card-copy">
+                      <h3>{item.title}</h3>
+                      {isDefault ? <em className="saved-default-tag">Default Address</em> : null}
+                      {item.lines.map((line) => (
+                        <p key={line}>{line}</p>
+                      ))}
+                      <span>{item.phone}</span>
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
+
+            <div className="saved-section-actions">
+              <button
+                type="button"
+                className="set-default-btn"
+                onClick={handleSetDefaultAddress}
+                disabled={!selectedAddressId || selectedAddressId === defaultAddressId}
               >
-                <div className="saved-card-top">
-                  <div className="saved-icon-wrap">
-                    <TypeIcon />
-                  </div>
+                {selectedAddressId === defaultAddressId
+                  ? "Selected Address Is Default"
+                  : "Set Selected Address As Default"}
+              </button>
+            </div>
+          </section>
 
-                  <div className="saved-card-actions">
-                    <button type="button" className="saved-round-btn" aria-label={`Edit ${item.title}`}>
-                      <PencilIcon />
-                    </button>
-                    {active ? (
-                      <span className="saved-round-btn saved-round-btn-dark" aria-hidden="true">
-                        <CheckIcon />
-                      </span>
-                    ) : null}
-                  </div>
-                </div>
+          <div className="section-divider">
+            <span>Add Another Address</span>
+          </div>
+        </>
+      ) : null}
 
-                <div className="saved-card-copy">
-                  <h3>{item.title}</h3>
-                  {item.lines.map((line) => (
-                    <p key={line}>{line}</p>
-                  ))}
-                  <span>{item.phone}</span>
-                </div>
-              </article>
-            );
-          })}
-        </div>
+      <form
+        className={`address-form-card${!hasSavedAddresses ? " is-priority" : ""}`}
+        onSubmit={handleAddAddress}
+        noValidate
+      >
+        {!hasSavedAddresses ? (
+          <div className="empty-address-note">
+            <h2>Add Your First Address</h2>
+            <p>Start by entering your shipping details below.</p>
+          </div>
+        ) : isEditing ? (
+          <div className="empty-address-note">
+            <h2>Update Address</h2>
+            <p>Edit the selected address details and save your changes.</p>
+          </div>
+        ) : null}
 
-        <button type="button" className="add-address-btn">
-          <PlusIcon />
-          Add New Address
-        </button>
-      </section>
-
-      <div className="section-divider">
-        <span>Or Add New Address</span>
-      </div>
-
-      <form className="address-form-card" onSubmit={handleSubmit} noValidate>
         <div className="address-form-grid">
           <label>
             Full Name
@@ -315,14 +502,23 @@ export default function CheckoutPage() {
           </label>
         </div>
 
-        <label className="default-checkbox">
-          <input
-            type="checkbox"
-            checked={useDefault}
-            onChange={(event) => setUseDefault(event.target.checked)}
-          />
-          <span>Set as default shipping address</span>
-        </label>
+        <div className="address-form-actions">
+          <label className="default-checkbox">
+            <input
+              type="checkbox"
+              checked={useDefault}
+              onChange={(event) => setUseDefault(event.target.checked)}
+            />
+            <span>Set as default shipping address</span>
+          </label>
+
+          <button type="submit" className="inline-add-address-btn">
+            <PlusIcon />
+            {isEditing ? "Update Address" : "Add Address"}
+          </button>
+        </div>
+
+        {limitError ? <p className="address-limit-error">{limitError}</p> : null}
 
         <div className="address-footer-bar">
           <button type="button" className="back-link" onClick={() => router.push("/")}>
@@ -330,7 +526,12 @@ export default function CheckoutPage() {
             Back
           </button>
 
-          <button type="submit" className="address-submit-btn">
+          <button
+            type="button"
+            className="address-submit-btn"
+            onClick={handleContinue}
+            disabled={!selectedAddressId}
+          >
             Continue to Payment
             <ArrowRightIcon />
           </button>

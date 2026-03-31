@@ -180,9 +180,10 @@ export default function PaymentPage() {
 
             <div className="shipping-review">
               <h3>{address.fullName}</h3>
-              <p>12th Floor, Green Earth Tower</p>
-              <p>Outer Ring Road, Bangalore - {address.pinCode}</p>
+              <p>{address.email}</p>
+              <p>{address.city} - {address.pinCode}</p>
               <p>{address.state}, India</p>
+              <p>{address.phone}</p>
             </div>
           </section>
 

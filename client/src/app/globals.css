@@ -511,6 +511,10 @@ img {
   padding: 34px 0 28px 102px;
 }
 
+.address-hero.is-empty {
+  padding-bottom: 18px;
+}
+
 .address-hero h1 {
   margin: 0 0 12px;
   font-size: clamp(2.2rem, 4.2vw, 3.2rem);
@@ -562,7 +566,7 @@ img {
   min-height: 224px;
   padding: 16px 16px 14px;
   border-radius: 16px;
-  background: rgba(255, 255, 255, 0.82);
+  background: #f1efe8;
   border: 1px solid rgba(16, 34, 53, 0.04);
   box-shadow: 0 10px 26px rgba(80, 66, 42, 0.04);
   cursor: pointer;
@@ -575,12 +579,8 @@ img {
 .saved-card-top {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-end;
   margin-bottom: 18px;
-}
-
-.saved-icon-wrap {
-  color: #183426;
 }
 
 .saved-card-actions {
@@ -611,6 +611,17 @@ img {
   margin: 0 0 10px;
   font-size: 1.45rem;
   letter-spacing: -0.04em;
+}
+
+.saved-default-tag {
+  display: inline-flex;
+  margin: 0 0 10px;
+  font-style: normal;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #234736;
 }
 
 .saved-card-copy p {
@@ -671,6 +682,25 @@ img {
   margin-left: 102px;
 }
 
+.address-form-card.is-priority {
+  margin-top: 4px;
+}
+
+.empty-address-note {
+  margin-bottom: 18px;
+}
+
+.empty-address-note h2 {
+  margin: 0 0 8px;
+  font-size: 1.5rem;
+  letter-spacing: -0.03em;
+}
+
+.empty-address-note p {
+  margin: 0;
+  color: #52665c;
+}
+
 .address-form-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -729,6 +759,62 @@ img {
   margin: 0;
 }
 
+.address-form-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 18px;
+}
+
+.inline-add-address-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-width: 180px;
+  min-height: 46px;
+  border: none;
+  border-radius: 999px;
+  background: #234736;
+  color: #ffffff;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.saved-section-actions {
+  width: min(100%, 900px);
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 18px;
+}
+
+.set-default-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 42px;
+  padding: 0 18px;
+  border: 1px solid #234736;
+  border-radius: 999px;
+  background: transparent;
+  color: #234736;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.set-default-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.address-limit-error {
+  margin: 12px 0 0 18px;
+  color: var(--danger);
+  font-size: 0.88rem;
+  font-weight: 600;
+}
+
 .address-footer-bar {
   position: fixed;
   left: 0;
@@ -772,8 +858,14 @@ img {
   cursor: pointer;
 }
 
+.address-submit-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
 .address-submit-btn:hover,
-.add-address-btn:hover {
+.add-address-btn:hover,
+.inline-add-address-btn:hover {
   transform: translateY(-1px);
 }
 
@@ -980,7 +1072,7 @@ img {
 .order-summary-panel {
   padding: 18px 18px 16px;
   border-radius: 14px;
-  background: rgba(241, 237, 229, 0.88);
+  background: #ffffff;
 }
 
 .order-summary-line {
@@ -1288,9 +1380,19 @@ img {
     margin-left: 0;
   }
 
+  .saved-section-actions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
   .address-footer-bar {
     gap: 24px;
     justify-content: space-between;
+  }
+
+  .address-form-actions {
+    flex-direction: column;
+    align-items: stretch;
   }
 
   .payment-layout {
@@ -1378,6 +1480,10 @@ img {
   .back-link {
     width: 100%;
     justify-content: center;
+  }
+
+  .inline-add-address-btn {
+    width: 100%;
   }
 
   .selection-card {
