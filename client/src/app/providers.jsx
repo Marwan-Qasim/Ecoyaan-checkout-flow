@@ -14,21 +14,24 @@ const initialAddress = {
 };
 
 export function CheckoutProvider({ children }) {
-  const [address, setAddress] = useState(initialAddress);
+  const [address, setAddress] = useState(() => {
+    if (typeof window === "undefined") {
+      return initialAddress;
+    }
 
-  useEffect(() => {
     const saved = window.localStorage.getItem("ecoyaan-address");
     if (!saved) {
-      return;
+      return initialAddress;
     }
 
     try {
       const parsed = JSON.parse(saved);
-      setAddress({ ...initialAddress, ...parsed });
+      return { ...initialAddress, ...parsed };
     } catch {
       window.localStorage.removeItem("ecoyaan-address");
+      return initialAddress;
     }
-  }, []);
+  });
 
   useEffect(() => {
     window.localStorage.setItem("ecoyaan-address", JSON.stringify(address));
