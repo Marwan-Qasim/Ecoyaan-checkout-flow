@@ -451,7 +451,7 @@ img {
 .summary-card {
   padding: 20px;
   border-radius: 18px;
-  background: rgba(241, 237, 229, 0.88);
+  background: #ffffff;
   box-shadow: 0 14px 30px rgba(89, 76, 47, 0.08);
 }
 
